@@ -3,8 +3,6 @@
 #define DYNAMICARRAY_H
 #include <iostream>
 #include <stdexcept>
-#include <new>
-#include <type_traits>
 #include <cmath>
 #include <string>
 #include <typeinfo>
@@ -26,6 +24,28 @@ private:
     }
 
 public:
+    class Reference {
+    private:
+        DynamicArray& array;
+        int index;
+
+    public:
+        Reference(DynamicArray& array, int index) : array(array), index(index) {}
+
+        Reference& operator=(T value) {
+            array.set(index, value);
+            return *this;
+        }
+
+        Reference& operator=(const Reference& other) {
+            return *this = static_cast<T>(other);
+        }
+
+        operator T() const {
+            return array.get(index);
+        }
+    };
+
     DynamicArray(int size) {
         if (size < 0) {
             throw std::invalid_argument("размер массива не может быть отрицательным");
@@ -64,6 +84,18 @@ public:
         }
 
         return data[index];
+    }
+
+    Reference operator[](int index) {
+        if (index < 0 || index >= size) {
+            throw std::out_of_range("индекс вне границ");
+        }
+
+        return Reference(*this, index);
+    }
+
+    T operator[](int index) const {
+        return get(index);
     }
 
     void print() const {
@@ -120,6 +152,90 @@ public:
 
     int getSize() const {
         return size;
+    }
+
+    bool operator==(const DynamicArray& other) const {
+        if (size != other.size) {
+            return false;
+        }
+
+        for (int i = 0; i < size; i++) {
+            if (data[i] != other.data[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=(const DynamicArray& other) const {
+        return !(*this == other);
+    }
+
+    DynamicArray& operator+=(const DynamicArray& other) {
+        for (int i = 0; i < size; i++) {
+            T value = data[i];
+
+            if (i < other.size) {
+                value += other.data[i];
+            }
+
+            checkValue(value);
+            data[i] = value;
+        }
+
+        return *this;
+    }
+
+    DynamicArray& operator-=(const DynamicArray& other) {
+        for (int i = 0; i < size; i++) {
+            T value = data[i];
+
+            if (i < other.size) {
+                value -= other.data[i];
+            }
+
+            checkValue(value);
+            data[i] = value;
+        }
+
+        return *this;
+    }
+
+    DynamicArray& operator+=(T value) {
+        for (int i = 0; i < size; i++) {
+            T newValue = data[i] + value;
+            checkValue(newValue);
+            data[i] = newValue;
+        }
+
+        return *this;
+    }
+
+    DynamicArray& operator-=(T value) {
+        for (int i = 0; i < size; i++) {
+            T newValue = data[i] - value;
+            checkValue(newValue);
+            data[i] = newValue;
+        }
+
+        return *this;
+    }
+
+    T* begin() {
+        return data;
+    }
+
+    T* end() {
+        return data + size;
+    }
+
+    const T* begin() const {
+        return data;
+    }
+
+    const T* end() const {
+        return data + size;
     }
 
     double distance(const DynamicArray& other) const {
