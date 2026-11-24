@@ -1,41 +1,45 @@
-
 #include <iostream>
-#include <stdexcept>
-#include <new>
+#include <string>
 #include "../include/DynamicArray.h"
 
 int main() {
-    DynamicArray arr(3);
+    DynamicArray<int> arr(3);
+
+    arr.set(0, 10);
+    arr.set(1, 20);
+    arr.set(2, 30);
+
+    std::cout << "массив int: " << arr << std::endl;
+
+    DynamicArray<std::string> words(3);
+
+    words.set(0, "Hello");
+    words.set(1, "World");
+    words.set(2, "C++");
+
+    std::cout << "массив string: " << words << std::endl;
+
+    DynamicArray<int> arr2(3);
+
+    arr2.set(0, 13);
+    arr2.set(1, 24);
+    arr2.set(2, 35);
+
+    std::cout << "расстояние: " << arr.distance(arr2) << std::endl;
 
     try {
-        arr.set(0, 50);
-        std::cout << "Элемент добавлен\n";
+        words.distance(words);
+    }
+    catch (const std::bad_typeid& e) {
+        std::cout << "bad_typeid: расстояние для string недоступно\n";
+    }
 
-        arr.set(1, 150);
+    try {
+        DynamicArray<int> arr3(2);
+        std::cout << arr.distance(arr3) << std::endl;
     }
     catch (const std::invalid_argument& e) {
-        std::cout << "invalid_argument: " << e.what() << '\n';
-    }
-
-    try {
-        arr.get(5);
-    }
-    catch (const std::out_of_range& e) {
-        std::cout << "out_of_range: " << e.what() << '\n';
-    }
-
-    try {
-        arr.push_back(200);
-    }
-    catch (const std::invalid_argument& e) {
-        std::cout << "invalid_argument: " << e.what() << '\n';
-    }
-
-    try {
-        throw std::bad_alloc();
-    }
-    catch (const std::bad_alloc& e) {
-        std::cout << "bad_alloc: память не выделена\n";
+        std::cout << "invalid_argument: " << e.what() << std::endl;
     }
 
     return 0;
